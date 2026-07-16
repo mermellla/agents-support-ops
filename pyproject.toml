@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agents-support-ops"
+version = "0.1.0"
+description = "Operational controls and evidence artifacts for agent-assisted support workflows"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Ellen Kimble" }]
+dependencies = ["pydantic>=2.7,<3"]
+
+[project.optional-dependencies]
+openai = ["openai-agents>=0.6"]
+dev = ["pytest>=8", "pytest-cov>=5", "mypy>=1.11", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agents_support_ops"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["agents_support_ops"]
