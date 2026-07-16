@@ -4,7 +4,7 @@ import random
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Generic, ParamSpec, TypeVar
+from typing import Generic, Literal, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -47,7 +47,7 @@ class ToolExecutor(Generic[P, R]):
     retry_count: int = 0
 
     @property
-    def circuit_status(self) -> str:
+    def circuit_status(self) -> Literal["closed", "open", "half-open"]:
         if self.state.opened_at is None:
             return "closed"
         if self.clock() - self.state.opened_at >= self.policy.circuit_cooldown_seconds:
