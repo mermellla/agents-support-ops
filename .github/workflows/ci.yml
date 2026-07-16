@@ -20,3 +20,66 @@ jobs:
       - run: ruff check src tests
       - run: mypy src
       - run: pytest --cov=agents_support_ops --cov-report=term-missing
+
+  sdk-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk-version: ["0.6.0", "latest"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e ".[openai]"
+      - if: matrix.sdk-version != 'latest'
+        run: python -m pip install "openai-agents==${{ matrix.sdk-version }}"
+      - run: python -c "import agents; from agents_support_ops import SupportTraceProcessor"
+
+  distributions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install build twine
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Smoke-test wheel
+        run: |
+          python -m venv /tmp/agents-support-ops-wheel
+          /tmp/agents-support-ops-wheel/bin/pip install dist/*.whl
+          /tmp/agents-support-ops-wheel/bin/python -c "import agents_support_ops; assert agents_support_ops.__version__ == '0.2.0'"
+      - name: Smoke-test source distribution
+        run: |
+          python -m venv /tmp/agents-support-ops-sdist
+          /tmp/agents-support-ops-sdist/bin/pip install dist/*.tar.gz
+          /tmp/agents-support-ops-sdist/bin/python -c "from agents_support_ops import ReplayBundle"
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install --upgrade pip setuptools
+      - run: python -m pip install . pip-audit
+      - run: pip-audit
+      - run: python -m pip install ".[openai]"
+      - run: pip-audit
