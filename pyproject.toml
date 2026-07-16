@@ -4,17 +4,42 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agents-support-ops"
-version = "0.1.1"
+version = "0.2.0"
 description = "Operational controls and evidence artifacts for agent-assisted support workflows"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Ellen Kimble" }]
+keywords = ["agents", "support-engineering", "observability", "replay", "openai"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
 dependencies = ["pydantic>=2.7,<3"]
 
+[project.urls]
+Homepage = "https://github.com/mermellla/agents-support-ops"
+Documentation = "https://github.com/mermellla/agents-support-ops#readme"
+Issues = "https://github.com/mermellla/agents-support-ops/issues"
+Changelog = "https://github.com/mermellla/agents-support-ops/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
-openai = ["openai-agents>=0.6"]
-dev = ["pytest>=8", "pytest-cov>=5", "mypy>=1.11", "ruff>=0.6"]
+openai = ["openai-agents>=0.6,<1"]
+dev = [
+  "build>=1.2",
+  "mypy>=1.11",
+  "pip-audit>=2.7",
+  "pytest>=8",
+  "pytest-cov>=5",
+  "ruff>=0.6",
+  "twine>=5",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agents_support_ops"]

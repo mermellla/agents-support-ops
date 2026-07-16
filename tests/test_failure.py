@@ -37,3 +37,30 @@ def test_circuit_opens_after_threshold() -> None:
         pass
     else:
         raise AssertionError("Expected open circuit")
+
+
+def test_circuit_recovers_after_cooldown() -> None:
+    now = [100.0]
+    executor = ToolExecutor(
+        FailurePolicy(
+            max_attempts=1,
+            circuit_failure_threshold=1,
+            circuit_cooldown_seconds=30,
+        ),
+        clock=lambda: now[0],
+        sleep=lambda _: None,
+    )
+
+    def offline() -> None:
+        raise ConnectionError("offline")
+
+    try:
+        executor.execute(offline)
+    except ConnectionError:
+        pass
+    assert executor.circuit_status == "open"
+
+    now[0] += 30
+    assert executor.circuit_status == "half-open"
+    assert executor.execute(lambda: "recovered") == "recovered"
+    assert executor.circuit_status == "closed"

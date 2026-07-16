@@ -22,3 +22,14 @@ def test_redactor_removes_nested_secrets_and_pii(tmp_path) -> None:
     assert "sk-secretvalue123" not in raw
     parsed = json.loads(raw)
     assert parsed["payload"]["authorization"] == "[REDACTED]"
+
+
+def test_redactor_removes_pii_and_secrets_from_mapping_keys() -> None:
+    redacted = Redactor().redact(
+        {"Claim from person@example.com with sk-secretvalue123": ["ev_1"]}
+    )
+
+    serialized = json.dumps(redacted)
+    assert "person@example.com" not in serialized
+    assert "sk-secretvalue123" not in serialized
+    assert "Claim from [REDACTED] with [REDACTED]" in redacted

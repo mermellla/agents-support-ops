@@ -27,20 +27,27 @@ class Redactor:
 
     def redact(self, value: Any) -> Any:
         if isinstance(value, dict):
-            return {
-                str(key): self.replacement if str(key).casefold() in self.keys else self.redact(item)
-                for key, item in value.items()
-            }
+            redacted: dict[str, Any] = {}
+            for key, item in value.items():
+                key_text = str(key)
+                if key_text.casefold() in self.keys:
+                    redacted[key_text] = self.replacement
+                else:
+                    redacted[self._redact_text(key_text)] = self.redact(item)
+            return redacted
         if isinstance(value, list):
             return [self.redact(item) for item in value]
         if isinstance(value, tuple):
             return [self.redact(item) for item in value]
         if isinstance(value, str):
-            result = value
-            for pattern in self.SECRET_PATTERNS:
-                result = pattern.sub(self.replacement, result)
-            return result
+            return self._redact_text(value)
         return value
+
+    def _redact_text(self, value: str) -> str:
+        result = value
+        for pattern in self.SECRET_PATTERNS:
+            result = pattern.sub(self.replacement, result)
+        return result
 
 
 class AuditLog:
