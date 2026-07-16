@@ -37,6 +37,7 @@ jobs:
           path: .
           format: spdx-json
           output-file: release-evidence/agents-support-ops-${{ steps.version.outputs.version }}.spdx.json
+          upload-release-assets: false
       - name: Generate checksums
         run: |
           (cd dist && sha256sum *.whl *.tar.gz) > release-evidence/SHA256SUMS
